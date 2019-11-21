@@ -424,6 +424,8 @@ int main(void)
 
     unsigned int frontDist = 0;
     unsigned int rearDist = 0;
+    unsigned int prevFrontDist = 0;
+    unsigned int prevRearDist = 0;
     int transitionState = NO_BEEP;
 
     int index = 0;
@@ -462,6 +464,11 @@ int main(void)
         while(mode == USER_MODE){
             USBVals[index] = pulse_output_back();
             USFVals[index] = pulse_output_front();
+//              rearDist = pulse_output_back();
+//              frontDist = pulse_output_front();
+//              prevFrontDist = prevFrontDist*7/20 + frontDist*13/20;
+//              prevRearDist = prevRearDist*7/20 + rearDist*13/20;
+
 
             rearDist = (USBVals[index] + 4*USBVals[(index + 2) % 3] + USBVals[(index + 1) % 3])/6;
             frontDist = (USFVals[index] + 4*USFVals[(index + 2) % 3] + USFVals[(index + 1) % 3])/6;
@@ -469,34 +476,39 @@ int main(void)
             index++;
             index = index % 3;
 
+//            displayIntLCD(prevRearDist);
             displayIntLCD(rearDist);
-            if(rearDist < 400 && rearDist > rear_vals[0]){ //green range
+            if(rearDist < 400 && rearDist >= rear_vals[0]){ //green range
                 GPIO_setOutputHighOnPin(GREEN_LED_PORT, GREEN_LED_PIN);
                 GPIO_setOutputLowOnPin(YELLOW_LED_PORT, YELLOW_LED_PIN);
                 GPIO_setOutputLowOnPin(ORANGE_LED_PORT, ORANGE_LED_PIN);
                 GPIO_setOutputLowOnPin(RED_LED_PORT, RED_LED_PIN);
-            } else if(rearDist < rear_vals[0] && rearDist > rear_vals[1]){ // yellow range
+            } else if(rearDist < rear_vals[0] && rearDist >= rear_vals[1]){ // yellow range
                 GPIO_setOutputLowOnPin(GREEN_LED_PORT, GREEN_LED_PIN);
                 GPIO_setOutputHighOnPin(YELLOW_LED_PORT, YELLOW_LED_PIN);
                 GPIO_setOutputLowOnPin(ORANGE_LED_PORT, ORANGE_LED_PIN);
                 GPIO_setOutputLowOnPin(RED_LED_PORT, RED_LED_PIN);
 
-            } else if(rearDist < rear_vals[1] && rearDist > rear_vals[2]){
+            } else if(rearDist < rear_vals[1] && rearDist >= rear_vals[2]){
                 GPIO_setOutputLowOnPin(GREEN_LED_PORT, GREEN_LED_PIN);
                 GPIO_setOutputLowOnPin(YELLOW_LED_PORT, YELLOW_LED_PIN);
                 GPIO_setOutputHighOnPin(ORANGE_LED_PORT, ORANGE_LED_PIN);
                 GPIO_setOutputLowOnPin(RED_LED_PORT, RED_LED_PIN);
-            }else{
+            }else if (rearDist < rear_vals[2] && rearDist >= 0){
                 GPIO_setOutputLowOnPin(GREEN_LED_PORT, GREEN_LED_PIN);
                 GPIO_setOutputLowOnPin(YELLOW_LED_PORT, YELLOW_LED_PIN);
                 GPIO_setOutputLowOnPin(ORANGE_LED_PORT, ORANGE_LED_PIN);
                 GPIO_setOutputHighOnPin(RED_LED_PORT, RED_LED_PIN);
+            }else{
+                GPIO_setOutputLowOnPin(GREEN_LED_PORT, GREEN_LED_PIN);
+                GPIO_setOutputLowOnPin(YELLOW_LED_PORT, YELLOW_LED_PIN);
+                GPIO_setOutputLowOnPin(ORANGE_LED_PORT, ORANGE_LED_PIN);
+                GPIO_setOutputLowOnPin(RED_LED_PORT, RED_LED_PIN);
             }
 
             if(frontDist < 400 && frontDist > front_vals[0] ){
                 transitionState = NO_BEEP;
-            }
-            if(frontDist < front_vals[0] && frontDist > front_vals[1]){
+            } else if(frontDist < front_vals[0] && frontDist > front_vals[1]){
                 if(transitionState == NO_BEEP){
                     beep(0);
                 }
