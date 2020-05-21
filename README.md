@@ -1,0 +1,2 @@
+# Code to implement the Bike Sensor for ECE-298
+This code uses the ultrasonic sensor on a TI Launchpad to measure distance between objects in front of and behind it. It is also designed to be able to accept and store values from a user via a keypad, which will be the threshold values. When the ultrasonic sensor measures a distance that crosses these thresholds, it activates lights (for the front) or a beeper (for the back) to alert the user.
